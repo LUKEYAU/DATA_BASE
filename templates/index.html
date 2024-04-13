@@ -54,6 +54,7 @@
                 <th>課程名稱</th>
                 <th>上課時間</th>
                 <th>必修/選修</th>
+                <th>學分</th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -68,6 +69,7 @@
                 {% else %}
                     <td>選修</td>
                 {% endif %}
+                <td>{{ course.credits }}</td>
                 <td>
                     {% if course.enrolled %}
                         <form method="POST" action="/drop_course">

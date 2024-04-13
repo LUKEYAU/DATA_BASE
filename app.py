@@ -164,17 +164,61 @@ def drop_course():
     is_required = cursor.fetchone()[0]
     if is_required:
         return "warning : 您正試圖退出一門必修課程。"
-
+    
     # 更新選課記錄和課程已選學生人數
     cursor.execute("DELETE FROM enrollments WHERE student_id = %s AND course_id = %s", (student_id, course_id))
+    # 退選課程API中
     cursor.execute("UPDATE courses SET enrolled_students = enrolled_students - 1 WHERE course_id = %s", (course_id,))
     conn.commit()
-    return "message : 課程已成功退出"
+
+    # 檢查是否需要進行抽籤
+    lucky_student = lottery_for_course(course_id)
+    if lucky_student:
+        message = f"message: 課程已成功退出，學生 {lucky_student} 通過抽籤加選了課程。"
+    else:
+        message = "message: 課程已成功退出"
+    return message
+
 
 # 關注課程
 #@app.route('/watch_course', methods=['POST'])
-#def watch_course():
-#   return '未知錯誤發生'
+@app.route('/watch_course', methods=['POST'])
+def watch_course():
+    student_id = session['student_id']
+    course_id = request.form['course_id']
+    conn = db_connection()
+    cursor = conn.cursor()
+
+    # 檢查是否已選或已關注該課程
+    cursor.execute("SELECT * FROM enrollments WHERE student_id = %s AND course_id = %s", (student_id, course_id))
+    result = cursor.fetchone()
+    if result:
+        return "error: 已選擇或已關注該課程。"
+    
+    # 添加關注
+    cursor.execute("INSERT INTO enrollments (student_id, course_id, watching) VALUES (%s, %s, TRUE)", (student_id, course_id))
+    conn.commit()
+    return "message: 已成功關注課程"
+
+def lottery_for_course(course_id):
+    conn = db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # 獲取所有關注該課程的學生
+    cursor.execute("SELECT student_id FROM enrollments WHERE course_id = %s AND watching = TRUE", (course_id,))
+    watchers = cursor.fetchall()
+
+    if watchers:
+        # 隨機選取一名學生
+        from random import choice
+        lucky_student = choice(watchers)['student_id']
+        
+        # 更新該學生的選課記錄
+        cursor.execute("UPDATE enrollments SET watching = FALSE WHERE student_id = %s AND course_id = %s", (lucky_student, course_id))
+        cursor.execute("UPDATE courses SET enrolled_students = enrolled_students + 1 WHERE course_id = %s", (course_id,))
+        conn.commit()
+        return lucky_student
+    return None
 
 # 列出課程
 @app.route('/view_courses', methods=['POST'])
