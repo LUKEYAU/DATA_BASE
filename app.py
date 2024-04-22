@@ -48,7 +48,8 @@ def index():
     student_id = session['student_id']
     conn = db_connection()
     cursor = conn.cursor(dictionary=True)
-
+    cursor.execute("SELECT name FROM students WHERE student_id = %s", (student_id,))
+    name = cursor.fetchone()['name']
     cursor.execute("SELECT department FROM students WHERE student_id = %s", (student_id,))
     result = cursor.fetchone()
     if result:
@@ -66,7 +67,7 @@ def index():
         cursor.execute("SELECT SUM(c.credits) as total_credits FROM courses c JOIN enrollments e ON c.course_id = e.course_id WHERE e.student_id = %s", (student_id,))
         total_credits = cursor.fetchone()['total_credits'] or 0
 
-        return render_template('index.html', student_id=student_id, courses=courses, total_credits=total_credits)
+        return render_template('index.html', result=result['department'], student_id=student_id, courses=courses,name=name, total_credits=total_credits)
 
     return "加載課程出錯或未找到學生系部"
 
