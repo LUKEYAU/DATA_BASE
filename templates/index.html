@@ -55,6 +55,7 @@
                 <th>上課時間</th>
                 <th>必修/選修</th>
                 <th>學分</th>
+                <th>當前人數/人數上限</th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -70,13 +71,14 @@
                     <td>選修</td>
                 {% endif %}
                 <td>{{ course.credits }}</td>
+                <th>{{course.enrolled_students}} / {{course.capacity}}</th>
                 <td>
                     {% if course.enrolled %}
                         <form method="POST" action="/drop_course">
                             <input type="hidden" name="course_id" value="{{ course.course_id }}">
                             <input type="submit" value="退選">
                         </form>
-                        {% elif not course.full %}
+                    {% elif not course.enrolled_students>=course.capacity %}
                         <form method="POST" action="/add_course">
                             <input type="hidden" name="course_id" value="{{ course.course_id }}">
                             <input type="submit" value="加選">

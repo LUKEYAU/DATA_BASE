@@ -57,7 +57,7 @@ def index():
         cursor.execute("SELECT * FROM courses WHERE department = %s", (department,))
         courses = cursor.fetchall()
         # 確定哪些課程已被學生選擇
-        cursor.execute("SELECT course_id FROM enrollments WHERE student_id = %s", (student_id,))
+        cursor.execute("SELECT course_id FROM enrollments WHERE student_id = %s and watching = %s", (student_id,False))
         enrolled_courses = {row['course_id'] for row in cursor.fetchall()}
 
         for course in courses:
@@ -181,7 +181,6 @@ def drop_course():
 
 
 # 關注課程
-#@app.route('/watch_course', methods=['POST'])
 @app.route('/watch_course', methods=['POST'])
 def watch_course():
     student_id = session['student_id']
