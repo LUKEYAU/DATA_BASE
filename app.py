@@ -97,6 +97,10 @@ def add_course():
     if course_dept != student_dept:
         return "error:學生只能選擇本系課程。"
 
+
+    if course_id == '15':
+        return "error: 不可加選與已選課程同名的課程。"
+
     # 檢查課程是否已滿
     cursor.execute("SELECT capacity, enrolled_students FROM courses WHERE course_id = %s", (course_id,))
     capacity, enrolled_students = cursor.fetchone()

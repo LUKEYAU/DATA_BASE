@@ -27,9 +27,9 @@ INSERT INTO `courses` (`course_id`,`course_name`, `department`, `capacity`, `enr
 (10, '數位系統設計', 'Computer Science', 5, 1, 0, 4, 'Wednesday 1PM-3PM'),
 (11, '數位系統設計實驗', 'Computer Science', 5, 1, 0, 4, 'Wednesday 3PM-4PM'),
 (12, '工程數學(二)', 'Chemical Engineering', 5, 1, 0, 4, 'Tuesday 9AM-12PM'),
-(13, '影像創作與視覺行銷', 'Marketing', 5, 0, 0, 4, 'Thursday 1PM-4PM');
-
-
+(13, '影像創作與視覺行銷', 'Marketing', 5, 0, 0, 4, 'Thursday 1PM-4PM'),
+(14,'design','Electrical Engineering', 5, 1, 0, 4, 'Sunday 1PM-4PM'),
+(15,'系統程式','Computer Science', 5, 1, 0, 4, 'Sunday 1PM-4PM');
 CREATE TABLE `students` (
   `student_id` varchar(255) NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -51,6 +51,7 @@ INSERT INTO `students` (`student_id`, `name`, `department`) VALUES
 CREATE TABLE `enrollments` (
   `enrollment_id` int(11) NOT NULL,
   `student_id` varchar(255) DEFAULT NULL,
+  `course_name` varchar(255) NOT NULL,
   `course_id` int(11) DEFAULT NULL,
   `watching` BOOLEAN NOT NULL DEFAULT FALSE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -83,7 +84,7 @@ JOIN `courses` c ON s.department = c.department
 WHERE c.is_required = 1
   AND NOT EXISTS (
     SELECT 1 FROM `enrollments` e
-    WHERE e.student_id = s.student_id AND e.course_id = c.course_id
+    WHERE e.student_id = s.student_id AND e.course_id = c.course_id AND e.course_name = c.course_name and c.is_required = 1
   );
 UPDATE `courses` c
 SET c.enrolled_students = (
